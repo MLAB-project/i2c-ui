@@ -21,7 +21,7 @@ def main():
 
     cfg = config.Config(
         i2c = {
-            "port": 0,
+            "port": 1,
         },
         bus = [
             {

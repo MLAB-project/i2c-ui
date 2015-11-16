@@ -77,11 +77,17 @@ class graph(tornado.web.RequestHandler):
     def get(self, name=None):
         self.render("templates/baseW.html", title="My title", data=[])
 
+clients = []
+
+def send_to_all_clients(msg):
+    for client in clients:
+        client.write_message(msg)
 
 class streamer(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print("WebSocket opened")
+        clients.append(self)
 
     def on_message(self, message):
         self.write_message(u"You said: " + message)
@@ -89,19 +95,6 @@ class streamer(tornado.websocket.WebSocketHandler):
     def on_close(self):
         print("WebSocket closed")
     
-    '''
-    application = tornado.web.Application([
-        (r"/", bla),
-        (r'/var/(.+)', var),
-        (r'/ver/(.+)', ver),
-        (r'/rt/(.+)', streamer),
-        (r'/rt/', streamer),
-        (r'/images/(.*)', tornado.web.StaticFileHandler, {'path': './src/media/'}),
-        (r'/javascript/(.*)',tornado.web.StaticFileHandler, {'path': './src/js/'}),
-        (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': '.'}),
-        (r'/bla/(.*)', bla)
-    ])
-    '''
 
 class MlabVisualiser(tornado.web.Application):
     def __init__(self, projectName):
@@ -132,15 +125,16 @@ class MlabVisualiser(tornado.web.Application):
 
     def getValue(self, SensorLabel):
         table = np.array(self.project[SensorLabel][:])
-        table = np.append(table,[[table.shape[0], time.time(), self.projectCallbacks[SensorLabel]()]], axis=0)
+        val = self.projectCallbacks[SensorLabel]()
+        table = np.append(table,[[table.shape[0], time.time(), val]], axis=0)
         self.project[SensorLabel].resize(table.shape)
         self.project[SensorLabel][:,:]=table
         self.project.flush()
+        return val
 
     def getSensors(self):
         return self.projectCallbacks.keys()
 
-    
     def ThreadMeasure(self, parent, SensorLabels, delay, repeat):
             status = True
             print "run"
@@ -149,9 +143,11 @@ class MlabVisualiser(tornado.web.Application):
                 if repeat == 0 or repeat >= loop:
                     if parent.lastWrite+delay/1000.0 <= time.time():
                         for SensorLabel in SensorLabels:
-                            parent.getValue(SensorLabel)
+                            val = parent.getValue(SensorLabel)
+                            #print val
                             parent.lastWrite = time.time()
                             loop =+ 1
+                            send_to_all_clients(str("$rtdt")+";"+str(SensorLabel)+";"+str(time.time())+";"+str(val))
 
     def run(self, dataNames, delay=1000, repeat=1):
         thr = threading.Thread(target=self.ThreadMeasure, args=(self, dataNames, delay, repeat))

@@ -107,6 +107,8 @@
     <script src="javascript/highstock.js"></script>
     <script src="javascript/modules/exporting.js"></script>
     <script src="javascript/highcharts.js"></script>
+    <script src="javascript/websocket_handle.js"></script>
+    <script src="https://rawgithub.com/RolandBanguiran/highstock-yaxis-panning/master/yaxis-panning.js"></script>
     <script type="text/javascript">
 $(function () {
 
@@ -132,43 +134,43 @@ $(function () {
             }
         },
 
-        rangeSelector: {
-            buttons: [{
-                count: 1,
-                type: 'minute',
-                text: '1M'
-            }, {
-                count: 5,
-                type: 'minute',
-                text: '5M'
-            }, {
-                type: 'all',
-                text: 'All'
-            }],
-            inputEnabled: true,
-            selected: 0
+        
+        rangeSelector : {
+                selected : 2
         },
 
         title : {
-            text : 'Live random data'
+            text : 'I2C user interface'
         },
 
         exporting: {
             enabled: true
         },
-
-        series : [{
-            name : 'Random data',
-            data : (function () {
-                // generate an array of random data
-                var data = [], time = (new Date()).getTime(), i;
-
-                //for (i = -1; i <= 0; i += 1) {
+        
+        series : [
+            {
+                name : 'Teplota01',
+                data : (function () {
+                    var data = [], time = (new Date()).getTime();
                     data.push([ time , 0 ]);
-                //}
-                return data;
-            }())
-        }]
+                    return data;
+                }())
+            },{
+                name : 'Teplota02',
+                data : (function () {
+                    var data = [], time = (new Date()).getTime();
+                    data.push([ time , 0 ]);
+                    return data;
+                }())
+            },{
+                name : 'vlhkost',
+                data : (function () {
+                    var data = [], time = (new Date()).getTime();
+                    data.push([ time , 0 ]);
+                    return data;
+                }())
+            }
+        ]
     });
 
 });
@@ -196,7 +198,9 @@ $(function () {
 <body>
 
 <div id = "MenuA" >
-<div><img src="images/icons/back_w_material.png" onclick="document.getElementById('MenuA').style.left = '-200px';"> MLAB Visualiser <br> project: <br> none</div>
+<div><img src="images/icons/back_w_material.png" onclick="document.getElementById('MenuA').style.left = '-200px';"> MLAB Visualiser <br> project: <br> none
+<a href="javascript:WebSocketTest()">Run WebSocket</a>
+</div>
 
 <form >
 <input id="connectingButton" type=submit value="connect">
