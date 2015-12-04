@@ -139,15 +139,30 @@ $(function () {
                 selected : 2
         },
 
-        title : {
+        title: {
             text : 'I2C user interface'
         },
 
         exporting: {
             enabled: true
-        },
-        
-        series : [
+        },series: [
+            {
+                name : 'null',
+                data : (function () {
+                    var data = [], time = (new Date()).getTime();
+                    data.push([ time , 0 ]);
+                    return data;
+                }())
+            }
+        ]
+    });
+
+});
+
+
+/*
+
+        series: [
             {
                 name : 'Teplota01',
                 data : (function () {
@@ -171,9 +186,8 @@ $(function () {
                 }())
             }
         ]
-    });
 
-});
+*/
 
         function addd() {
             var chart = $('#container').highcharts();

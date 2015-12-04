@@ -2,54 +2,55 @@ function WebSocketTest()
 {
 	if ("WebSocket" in window)
 	{
-		//alert("WebSocket is supported by your Browser!");
-
-		// Let us open a web socket
-		var ws = new WebSocket("ws://telescope.local:8888/rt/");
+		var ws = new WebSocket("ws://"+window.location.hostname+":"+window.location.port+"/rt/");
+		var sensors = [];
+		var startTime = 0;
 
 		ws.onopen = function()
 		{
-			// Web Socket is connected, send data using send()
-			ws.send("Message to send");
-			//alert("Message is sent...");
+			ws.send("Hello its me");
+			startTime = (new Date()).getTime()
+
 		};
 
 		ws.onmessage = function (evt) 
 		{ 
 			var received_msg = evt.data;
-			//alert("Message is received..."+received_msg);
+			console.log(received_msg);
 			var data = received_msg.split(';');
 
-			if (data[1] == "Teplota01") {
+			if (data[0]=="$rtdt"){
 				var chart = $('#container').highcharts();
+
+				if (sensors.indexOf(data[1]) > -1){
+					console.log( "LOG: " + sensors.indexOf(data[1]) )
+				}
+				else{
+					console.log("To byl novy sensor - "+data[1]+ " uz mam " +chart.series);
+					chart.addSeries({
+                		name : data[1],
+                		data : (function () {
+                    		var data = [], time = (new Date()).getTime();
+                    		data.push([ startTime , 0 ]);
+                    		return data;
+                		}())
+                	})
+					sensors.push(data[1]);
+				}
+
 				var x = (new Date()).getTime(), y = data[3]*1;
-				chart.series[0].addPoint([x, y], true, false);
-				console.log("A");
-			};
-			if (data[1] == "Teplota02") {
-				var chart = $('#container').highcharts();
-				var x = (new Date()).getTime(), y = data[3]*1;
-				chart.series[1].addPoint([x, y], true, false);
-				console.log("B");
-			};
-			if (data[1] == "vlhkost") {
-				var chart = $('#container').highcharts();
-				var x = (new Date()).getTime(), y = data[3]*1;
-				chart.series[2].addPoint([x, y], true, false);
-				console.log("C");
-			};
+				chart.series[sensors.indexOf(data[1])+1].addPoint([x, y], true, false);
+			}
 		};
 
 		ws.onclose = function()
 		{ 
-			// websocket is closed.
-			alert("Connection is closed..."); 
+			alert("Connection is closed... try it reload"); 
 		};
 	}
 
 	else
 	{
-		// The browser doesn't support WebSocket
 		alert("WebSocket NOT supported by your Browser!");
 	}
 }

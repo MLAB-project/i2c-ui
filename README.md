@@ -4,4 +4,4 @@ Software for visualisation real-time data in web browser
 
 # Dependencies
 
- sudo pip install h5py
+ sudo apt-get install python-h5py python-tornado
