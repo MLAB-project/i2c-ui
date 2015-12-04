@@ -54,9 +54,6 @@ def main():
         ],
     )
 
-
-        
-
     cfg.initialize()
 
     teplomer01 = cfg.get_device("lts01")
@@ -65,18 +62,17 @@ def main():
                                                 # initialize class with log filename
     mVis = mv.MlabVisualiser(filename)
                                                 # add sensors with labels, values and callbacks
-    mVis.addDataset("aaa", "Temperature [C]", teplomer01.get_temp)
-    mVis.addDataset("bbb", "Temperature [C]", vlhkost.get_temp)
-    mVis.addDataset("ccc", "RelativeHumidity [%]", vlhkost.get_hum)
-    #mVis.addDataset("ddd", "RelativeHumidity [%]", vlhkost.get_hum)
-    mVis.addDataset("ddd", "Temperature [C]", dp.get_dp)
+    mVis.addDataset("TempLTS", "Temperature [C]", teplomer01.get_temp)
+    mVis.addDataset("TempSHT", "Temperature [C]", vlhkost.get_temp)
+    mVis.addDataset("HumiSHT", "RelativeHumidity [%]", vlhkost.get_hum)
+    mVis.addDataset("DewpSHT", "Temperature [C]", dp.get_dp)
 
                                                 # this save values only once (optional)
     #mVis.getValue("Teplota01")
     #mVis.getValue("Teplota02")
     #mVis.getValue("vlhkost")
                                                 # infinity value reader, from sensor with labels in 1st array.
-    mVis.run(["aaa", "bbb", "ccc", "ddd"], delay=1000, repeat=0)
+    mVis.run(["TempLTS", "TempSHT", "HumiSHT", "DewpSHT"], delay=1000, repeat=0)
     print mVis.getSensors()
     mVis.startWeb()
 

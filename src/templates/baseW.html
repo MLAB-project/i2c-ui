@@ -145,16 +145,7 @@ $(function () {
 
         exporting: {
             enabled: true
-        },series: [
-            {
-                name : 'null',
-                data : (function () {
-                    var data = [], time = (new Date()).getTime();
-                    data.push([ time , 0 ]);
-                    return data;
-                }())
-            }
-        ]
+        }
     });
 
 });

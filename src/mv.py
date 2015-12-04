@@ -78,15 +78,24 @@ class graph(tornado.web.RequestHandler):
         self.render("templates/baseW.html", title="My title", data=[])
 
 clients = []
+Sensors = []
 
 def send_to_all_clients(msg):
     for client in clients:
-        client.write_message(msg)
+        try:
+            client.write_message(msg)
+        except Exception, e:
+            print "client " + str(client) + " is unreacheable"
 
 class streamer(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print("WebSocket opened")
+        l_sensors = "$hello;"+str(len(Sensors))+";"
+        for x in Sensors:
+            l_sensors = l_sensors + ( x +";" )
+        print l_sensors
+        self.write_message(l_sensors)
         clients.append(self)
 
     def on_message(self, message):
@@ -136,18 +145,22 @@ class MlabVisualiser(tornado.web.Application):
         return self.projectCallbacks.keys()
 
     def ThreadMeasure(self, parent, SensorLabels, delay, repeat):
+            SensorLabels = sorted(SensorLabels)
+            global Sensors
+            Sensors = SensorLabels
             status = True
             print "run"
             loop = 0
             while status:
                 if repeat == 0 or repeat >= loop:
                     if parent.lastWrite+delay/1000.0 <= time.time():
+                        newtime=time.time()
                         for SensorLabel in SensorLabels:
+                            id = SensorLabels.index(SensorLabel)
                             val = parent.getValue(SensorLabel)
-                            #print val
+                            send_to_all_clients(str("$rtdt")+";"+str(SensorLabel)+";"+str(newtime)+";"+str(val)+";"+str(id))
                             parent.lastWrite = time.time()
                             loop =+ 1
-                            send_to_all_clients(str("$rtdt")+";"+str(SensorLabel)+";"+str(time.time())+";"+str(val))
 
     def run(self, dataNames, delay=1000, repeat=1):
         thr = threading.Thread(target=self.ThreadMeasure, args=(self, dataNames, delay, repeat))
