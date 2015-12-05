@@ -58,7 +58,7 @@ def main():
 
     teplomer01 = cfg.get_device("lts01")
     vlhkost = cfg.get_device("sht25")
-    dp = dewpoint(vlhkost.get_temp, vlhkost.get_hum)
+    dp = dewpoint(teplomer01.get_temp, vlhkost.get_hum)
                                                 # initialize class with log filename
     mVis = mv.MlabVisualiser(filename)
                                                 # add sensors with labels, values and callbacks

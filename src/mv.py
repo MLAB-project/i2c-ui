@@ -102,7 +102,11 @@ class streamer(tornado.websocket.WebSocketHandler):
         self.write_message(u"You said: " + message)
 
     def on_close(self):
-        print("WebSocket closed")
+        print("WebSocket closed", self)
+        try:
+            clients.remove(self)
+        except Exception, e:
+            raise e
     
 
 class MlabVisualiser(tornado.web.Application):
