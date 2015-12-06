@@ -19,6 +19,10 @@ import tornado.web
 import tornado.websocket
 
 
+clients = []
+Sensors = []
+Outputs = []
+
 class hello(tornado.web.RequestHandler):
     def get(self):
         return render.touch()
@@ -75,10 +79,7 @@ class javascript(tornado.web.RequestHandler):
 
 class graph(tornado.web.RequestHandler):
     def get(self, name=None):
-        self.render("templates/baseW.html", title="My title", data=[])
-
-clients = []
-Sensors = []
+        self.render("templates/baseW.html", title="My title", data=[Sensors, Outputs])
 
 def send_to_all_clients(msg):
     for client in clients:
@@ -148,8 +149,9 @@ class MlabVisualiser(tornado.web.Application):
     def getSensors(self):
         return self.projectCallbacks.keys()
 
-    def ThreadMeasure(self, parent, SensorLabels, delay, repeat):
-            SensorLabels = sorted(SensorLabels)
+    def ThreadMeasure(self, parent, input, output, delay, repeat):
+            SensorLabels = sorted(input)
+            OutputLabels = sorted(output)
             global Sensors
             Sensors = SensorLabels
             status = True
@@ -166,8 +168,8 @@ class MlabVisualiser(tornado.web.Application):
                             parent.lastWrite = time.time()
                             loop =+ 1
 
-    def run(self, dataNames, delay=1000, repeat=1):
-        thr = threading.Thread(target=self.ThreadMeasure, args=(self, dataNames, delay, repeat))
+    def run(self, input=[], output=[], delay=1000, repeat=1):
+        thr = threading.Thread(target=self.ThreadMeasure, args=(self, input, output, delay, repeat))
         thr.setDaemon(True)
         thr.start()
         print "tohle je za threading"

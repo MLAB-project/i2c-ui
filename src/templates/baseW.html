@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>$content.titulek</title>
+    <title>{{ title }}</title>
     <style>
         body {
             background-color: #DEFCD7;
@@ -64,6 +64,7 @@
             margin: 0px 0px 0px 40px
         }
     </style>
+
     <script type="text/javascript">
         function AfterLoad() {
             document.getElementById("MenuA").style.left = "-200px";
@@ -110,95 +111,55 @@
     <script src="javascript/websocket_handle.js"></script>
     <script src="https://rawgithub.com/RolandBanguiran/highstock-yaxis-panning/master/yaxis-panning.js"></script>
     <script type="text/javascript">
-$(function () {
+    $(function () {
 
-    Highcharts.setOptions({
-        global : {
-            useUTC : false
-        }
-    });
+        Highcharts.setOptions({
+            global : {
+                useUTC : false
+            }
+        });
 
-    // Create the chart
-    $('#container').highcharts('StockChart', {
-        chart : {
-            events : {
-                load : function () {
-
-                    // set up the updating of the chart each second
-                    //var series = this.series[0];
-                    //setInterval(function () {
-                    //    var x = (new Date()).getTime(), y = Math.round(Math.random() * 100);
-                    //    series.addPoint([x, y], true, true);
-                    //}, 1000);
+        // Create the chart
+        $('#container').highcharts('StockChart', {
+            chart : {
+                events : {
+                    load : function () {
+                    }
                 }
+            },
+            
+            rangeSelector : {
+                    selected : 2
+            },
+
+            title: {
+                text : 'I2C user interface {{ data[0] }}'
+            },
+
+            exporting: {
+                enabled: true
             }
-        },
+        });
 
-        
-        rangeSelector : {
-                selected : 2
-        },
-
-        title: {
-            text : 'I2C user interface'
-        },
-
-        exporting: {
-            enabled: true
-        }
     });
 
-});
+    function addd() {
+        var chart = $('#container').highcharts();
+        var x = (new Date()).getTime(), y = Math.round(Math.random() * 500);
+        chart.series[0].addPoint([x, y], true, false);
+        console.log("Preg");
+        $.getJSON('var/json?sens=Teplota01', function(data) {
+        //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=large-dataset.json&callback=?', function(data) {
+            console.log("getJSON");
+            alert("data"); //uncomment this for debug
+            console.log(data);
+            console.log(data.Teplota01);
+            //alert(data.data+" "+data.Teplota01.data+" "+data.item3); //further debug
+            $('#MenuA').html("item1="+data.Teplota01+" item2="+data.item2+" item3="+data.item3+"");
+        });
+    };
 
-
-/*
-
-        series: [
-            {
-                name : 'Teplota01',
-                data : (function () {
-                    var data = [], time = (new Date()).getTime();
-                    data.push([ time , 0 ]);
-                    return data;
-                }())
-            },{
-                name : 'Teplota02',
-                data : (function () {
-                    var data = [], time = (new Date()).getTime();
-                    data.push([ time , 0 ]);
-                    return data;
-                }())
-            },{
-                name : 'vlhkost',
-                data : (function () {
-                    var data = [], time = (new Date()).getTime();
-                    data.push([ time , 0 ]);
-                    return data;
-                }())
-            }
-        ]
-
-*/
-
-        function addd() {
-            var chart = $('#container').highcharts();
-            var x = (new Date()).getTime(), y = Math.round(Math.random() * 500);
-            chart.series[0].addPoint([x, y], true, false);
-            console.log("Preg");
-            $.getJSON('var/json?sens=Teplota01', function(data) {
-            //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=large-dataset.json&callback=?', function(data) {
-                console.log("getJSON");
-                alert("data"); //uncomment this for debug
-                console.log(data);
-                console.log(data.Teplota01);
-                //alert(data.data+" "+data.Teplota01.data+" "+data.item3); //further debug
-                $('#MenuA').html("item1="+data.Teplota01+" item2="+data.item2+" item3="+data.item3+"");
-            });
-        };
-
-
-
-        </script>
+    </script>
 </head>
 <body>
 
@@ -217,10 +178,15 @@ Ahoj
         <ul>
             <li><img src="images/icons/menu_w_material.png" onclick="document.getElementById('MenuA').style.left = '0px';"></li>
             <li><a href="javascript:WebSocketTest()"><img src="images/icons/play_w_material.png"></li></a>
-            <li></li>
-            <li><img src="images/icons/sensor_w_material.png" onclick="addd()" id="button"></li>
-            <li><img src="images/icons/sensor_w_material.png" onclick="mainDivSens('Teplota02', 0);" id="button"></li>
-            <li><img src="images/icons/sensor_w_material.png" id="driver"></li>
+                <li>IN</li>
+                {% for sens in data[0] %}
+                    <li><img src="images/icons/sensor_w_material.png" alt="{{ sens }}"></li>
+                {% end %}
+                <li>OUT</li>
+                {% for sens in data[1] %}
+                    <li><img src="images/icons/output_w_material.png" alt="{{ sens }}"></li>
+                {% end %}
+
         </ul>
     </div>
     <div id="W_data">
