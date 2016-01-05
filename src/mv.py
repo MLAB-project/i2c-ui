@@ -22,6 +22,7 @@ import tornado.websocket
 clients = []
 Sensors = []
 Outputs = []
+GlobData = ["name"]
 
 class hello(tornado.web.RequestHandler):
     def get(self):
@@ -33,10 +34,9 @@ class var(tornado.web.RequestHandler):
         print "VAR get", name
         if str(name) == "json":
             json="?("
-            sensors = self.get_argument("sens", default='', strip=False).split(",")
-            print sensors
-            project = h5py.File("test"+'.hdf5', 'a')
-            for sens in sensors:
+            print Sensors
+            project = h5py.File(GlobData[0]+'.hdf5', 'a')
+            for sens in Sensors:
                 table = np.array(project[sens][:])
                 json += '{"'+str(sens)+'":{"sensor":"'+str(sens)+'", "pointStart":'+str(float(table[0][1]))+',"pointInterval":'+str(1)+',"data":['
                 for row in table:
@@ -45,6 +45,21 @@ class var(tornado.web.RequestHandler):
                 json += '},'
             json += '});'
             self.write( json )
+
+        elif str(name) in Sensors:
+            project = h5py.File(GlobData[0]+'.hdf5', 'a')
+            table = np.array(project[str(name)][:])
+            '''
+            json="?("
+            json += '{"'+str(name)+'":{"sensor":"'+str(name)+'", "pointStart":'+str(float(table[0][1]))+',"pointInterval":'+str(1)+',"data":['
+            for row in table:
+                json += str(float(row[2]))+', '
+                print
+            json += ']'
+            json += '},'
+            json += '});'
+            '''
+            self.write( str(table) )
 
         else:
             print str(name)
@@ -79,7 +94,7 @@ class javascript(tornado.web.RequestHandler):
 
 class graph(tornado.web.RequestHandler):
     def get(self, name=None):
-        self.render("templates/baseW.html", title="My title", data=[Sensors, Outputs])
+        self.render("templates/baseW.html", title=str(sys.argv[0])+" "+ str(', '.join(map(str, Sensors))) + "I, "+ str(', '.join(map(str, Outputs))) + "O", data=[Sensors, Outputs])
 
 def send_to_all_clients(msg):
     for client in clients:
@@ -112,10 +127,12 @@ class streamer(tornado.websocket.WebSocketHandler):
 
 class MlabVisualiser(tornado.web.Application):
     def __init__(self, projectName):
-        self.lastWrite = time.time()
+        global GlobData
+        GlobData[0] = projectName
         self.projectName = projectName
         self.projectCallbacks = {}
         self.project = h5py.File(self.projectName+'.hdf5', 'a')
+        self.lastWrite = time.time()
         handlers = [
             (r"/", graph),
             (r'/var/(.+)', var),

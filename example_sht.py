@@ -30,35 +30,36 @@ class dewpoint():
 
 def main():
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         sys.stderr.write("Invalid number of arguments.\n")
-        sys.stderr.write("Usage: %s Project_file (without extension)\n" % (sys.argv[0], ))
+        sys.stderr.write("Usage: %s I2C_port Project_file (without extension)\n" % (sys.argv[0], ))
         sys.exit(1)
 
-        filename = sys.argv[1]
+    i2cport  = int(sys.argv[1])
+    filename = sys.argv[2]
 
-        cfg = config.Config(
-            i2c = {
-                "port": 1,
+    cfg = config.Config(
+        i2c = {
+            "port": i2cport,
+        },
+        bus = [{
+                "name": "sht25", "type": "sht25",
             },
-            bus = [{
-                    "name": "sht25", "type": "sht25",
-                },
-            ],
-        )
+        ],
+    )
 
-        cfg.initialize()
+    cfg.initialize()
 
-        sensorsSHT = cfg.get_device("sht25")
-        dp = dewpoint(sensorsSHT.get_temp, sensorsSHT.get_hum)
-        mVis = mv.MlabVisualiser(filename)              # initialize class with log filename
+    sensorsSHT = cfg.get_device("sht25")
+    dp = dewpoint(temp=sensorsSHT.get_temp, hum=sensorsSHT.get_hum)
+    mVis = mv.MlabVisualiser(filename)              # initialize class with log filename
 
-        mVis.addDataset("TempSHT", "Temperature [C]", sensorsSHT.get_temp)  # add sensors with labels, values and callbacks
-        mVis.addDataset("HumiSHT", "RelativeHumidity [%]", sensorsSHT.get_hum)
-        mVis.addDataset("DewpSHT", "Temperature [C]", dp.get_dp)
+    mVis.addDataset("TempSHT", "Temperature [C]", sensorsSHT.get_temp)  # add sensors with labels, values and callbacks
+    mVis.addDataset("HumiSHT", "RelativeHumidity [%]", sensorsSHT.get_hum)
+    mVis.addDataset("DewpSHT", "Temperature [C]", dp.get_dp)
 
-        mVis.run(input=["TempLTS", "TempSHT", "HumiSHT", "DewpSHT"], delay=1000, repeat=0) # infinity value reader, from sensor with labels in 1st array.
-        mVis.startWeb()
+    mVis.run(input=["TempSHT", "HumiSHT", "DewpSHT"], delay=1000, repeat=0) # infinity value reader, from sensor with labels in 1st array.
+    mVis.startWeb()
 
-    if __name__ == '__main__':
-        main()
+if __name__ == '__main__':
+    main()
