@@ -126,13 +126,15 @@ class streamer(tornado.websocket.WebSocketHandler):
     
 
 class MlabVisualiser(tornado.web.Application):
-    def __init__(self, projectName):
+    def __init__(self, projectName="ProjectLog", LocalWebTime=1, filedivide=0):
         global GlobData
         GlobData[0] = projectName
+        #GlobData[1] = LocalWebTime*60
         self.projectName = projectName
         self.projectCallbacks = {}
-        self.project = h5py.File(self.projectName+'.hdf5', 'a')
+        self.project = h5py.File(self.projectName+'.hdf5', 'a', userblock_size=1024*filedivide)
         self.lastWrite = time.time()
+        self.lastNewFile = time.time()
         handlers = [
             (r"/", graph),
             (r'/var/(.+)', var),
