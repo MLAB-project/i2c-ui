@@ -24,9 +24,10 @@ def main():
     mVis = mv.MlabVisualiser(filename)
                                                 # add sensors with labels, values and callbacks
     mVis.addDataset("random", "[X]", random.random)
+    mVis.addDataset("random2", "[X]", random.random)
 
                                                 # infinity value reader, from sensor with labels in 1st array.
-    mVis.run(["random"], delay=1000, repeat=0)
+    mVis.run(["random", "random2"], delay=1000, repeat=0)
     print mVis.getSensors()
     mVis.startWeb()
 
