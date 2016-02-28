@@ -1,0 +1,4 @@
+string i2c
+string bus
+---
+bool status
