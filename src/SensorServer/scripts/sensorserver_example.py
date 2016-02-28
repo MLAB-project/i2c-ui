@@ -9,6 +9,7 @@ from std_msgs.msg import String
 from std_msgs.msg import Float32
 import std_msgs
 from sensor_server.srv import *
+from sensor_server.msg import *
 
 def server(req):
     print req
@@ -52,7 +53,7 @@ class pymlab_server():
     def status(self, cfg=None):
         print "status>>"
         print cfg
-        self.rate = 0.1
+        self.rate = 1
         ecfg = eval(cfg.data)
         print ecfg
         if 'rate' in ecfg:
@@ -67,15 +68,13 @@ class pymlab_server():
             methods = self.methods
             devices = self.devices
             #sender = rospy.Publisher('pymlab_data', String)
-            sender = {}
-            for x in methods:
-                sender[x] = rospy.Publisher('pymlab_data/'+str(x), String)
+            sender = rospy.Publisher('pymlab_data', SensorValues)
             print sender
             while not rospy.is_shutdown():
                 for x in methods:
                     print x
                     data = getattr(devices[x], methods[x])()
-                    sender[x].publish(str(data))
+                    sender.publish(name=str(devices[x]), value=data)
                 rate.sleep()
 
 

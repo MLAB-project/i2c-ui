@@ -36,5 +36,5 @@ if __name__ == "__main__":
     print odpoved
 
     pymlab = rospy.ServiceProxy('pymlab', GetSensVal)
-    odpoved = pymlab(data = "{'sht':'get_temp', 'rate':1, 'start':True, 'methods':{'sht':'get_temp'}}")
+    odpoved = pymlab(data = "{'sht': 'get_temp', 'rate': 10, 'start': True, 'methods': {'sht':'get_temp'}}")
     print odpoved
