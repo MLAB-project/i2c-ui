@@ -5,7 +5,8 @@ import pymlab
 from pymlab import config
 import sys
 import sensor_server
-#from std_msgs.msg import String
+from std_msgs.msg import String
+from std_msgs.msg import Float32
 import std_msgs
 from sensor_server.srv import *
 
@@ -19,6 +20,9 @@ class pymlab_server():
         pass
 
     def init(self, cfg=None):
+        self.status = False
+        self.init = cfg
+        self.devices = {}
         print cfg
         i2c = {
                 "port": 1,
@@ -31,22 +35,57 @@ class pymlab_server():
                 ]
         self.pymlab_config = config.Config(i2c = eval(cfg.i2c), bus = eval(cfg.bus))
         self.pymlab_config.initialize()
-        self.lts_sen = self.pymlab_config.get_device("lts01")
-        print "done"
+        for x in eval(cfg.devices):
+            self.devices[x] = self.pymlab_config.get_device(eval(cfg.devices)[x])
+        #for x in self.devices:
+        #    print self.devices[x].get_temp()
+
         return True
 
-    def getvalue(self, name=None, type=None, value=None):
-        print name, type, value
+    def getvalue(self, cfg=None):
+        print "getval>>"
+        print cfg
         val = int(float(self.lts_sen.get_temp()))
         print "value je tohle:", val
         return GetSensValResponse(val)
+
+    def status(self, cfg=None):
+        print "status>>"
+        print cfg
+        self.rate = 0.1
+        ecfg = eval(cfg.data)
+        print ecfg
+        if 'rate' in ecfg:
+            self.rate = ecfg['rate']
+            print "rate", self.rate
+        if 'methods' in ecfg:
+            self.methods = ecfg['methods']
+            print "methods", self.methods
+        if "start" in ecfg:
+            self.status = True
+            rate = rospy.Rate(self.rate)
+            methods = self.methods
+            devices = self.devices
+            #sender = rospy.Publisher('pymlab_data', String)
+            sender = {}
+            for x in methods:
+                sender[x] = rospy.Publisher('pymlab_data/'+str(x), String)
+            print sender
+            while not rospy.is_shutdown():
+                for x in methods:
+                    print x
+                    data = getattr(devices[x], methods[x])()
+                    sender[x].publish(str(data))
+                rate.sleep()
+
 
 def add_two_ints_server():
     ps = pymlab_server()
     rospy.init_node('pymlab_node')
     s1 = rospy.Service('pymlab_init', PymlabInit, ps.init)
-    s2 = rospy.Service('pymlab', GetSensVal, ps.getvalue)
-    print "Ready to add two ints."
+    s2 = rospy.Service('pymlab', GetSensVal, ps.status)
+    rospy.Subscriber("pymlab_status", String, ps.status)
+    print "Ready to get work."
     rospy.spin()
 
 if __name__ == "__main__":

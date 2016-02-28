@@ -19,15 +19,22 @@ if __name__ == "__main__":
                     "name":           "lts01",
                     "type":           "lts01",
                 },
+                {
+                    "name":           "sht25",
+                    "type":           "sht25",
+                },
             ]'''
-    pymlab_init = rospy.ServiceProxy('pymlab_init', PymlabInit, headers= {'i2c':i2c, 'bus':bus} )
-    pymlab = rospy.ServiceProxy('pymlab', GetSensVal)
+    devices = '''{
+                "sht":                  "sht25",
+                "lts":                  "lts01",
+            }'''
+
     rospy.init_node('pymlab_client', anonymous=True)
 
-    rospy.loginfo("init")
-    time.sleep(1)
-    odpoved = pymlab_init(i2c=i2c, bus=bus)
+    pymlab = rospy.ServiceProxy('pymlab_init', PymlabInit)
+    odpoved = pymlab(i2c=i2c, bus=bus, devices=devices)
     print odpoved
-    odpoved = pymlab("ahoj", "maje")
 
-    print "%s + %s = %s"%(2, 1, odpoved)
+    pymlab = rospy.ServiceProxy('pymlab', GetSensVal)
+    odpoved = pymlab(data = "{'sht':'get_temp', 'rate':1, 'start':True, 'methods':{'sht':'get_temp'}}")
+    print odpoved
