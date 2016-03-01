@@ -62,7 +62,8 @@ class pymlab_server():
         print ecfg
         if 'rate' in ecfg:
             self.rate = ecfg['rate']
-            rospy.set_param("rate", float(self.rate))
+            print "Vlastni frekvence", self.rate
+        rospy.set_param("rate", float(self.rate))
         if 'methods' in ecfg:
             self.methods = ecfg['methods']
             rospy.set_param("methods", str(self.methods))

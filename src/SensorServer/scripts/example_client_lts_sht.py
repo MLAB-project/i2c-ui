@@ -16,11 +16,11 @@ if __name__ == "__main__":
         }'''
     bus = '''[
                 {
-                    "name":           "lts01",
+                    "name":           "Teplomer01",
                     "type":           "lts01",
                 },
                 {
-                    "name":           "sht25",
+                    "name":           "Vlhkomer01",
                     "type":           "sht25",
                 },
             ]'''
@@ -33,5 +33,5 @@ if __name__ == "__main__":
     print odpoved
 
     pymlab = rospy.ServiceProxy('pymlab', GetSensVal)
-    odpoved = pymlab(data = "{'sht': 'get_temp', 'rate': 10, 'start': True, 'methods': {'sht25':{'get_temp', 'get_hum'},'lts01':{'get_temp'}}}")
+    odpoved = pymlab(data = "{'sht': 'get_temp', 'rate': 10, 'start': True, 'methods': {'Vlhkomer01':{'get_temp', 'get_hum'},'Teplomer01':{'get_temp'}}}")
     print odpoved
