@@ -12,23 +12,22 @@ from sensor_server.srv import *
 from sensor_server.msg import *
 
 def Data(msg, callback_args=None):
-    #callback_args['send'][msg.name].publish(msg.value)
-    send = rospy.Publisher("pymlab/"+str(msg.name), Float32)
-    send.publish(msg.value)
+    callback_args['send'][str(msg.name)].publish(msg.value)
 
 def main():
     #sender.publish(name=str(devices[x]), value=data)
     rospy.init_node('pymlab_plotter_connector')
-    #send = {}
+    values = rospy.get_param("values")
+    send = {}
     #print "methods >>>",rospy.get_param("methods")
     #print "devices >>>",rospy.get_param("devices")
     #devices = eval(rospy.get_param("devices"))
     #print devices
     #se=rospy.Publisher('pymlab/data/', Float32)
-    #for x in devices:
-    #    send[devices[x]]=rospy.Publisher("pymlab/"+str(x), Float32)
-    #print "send >>>", send
-    rospy.Subscriber("pymlab_data", SensorValues, Data, callback_args={'send': None, 'devices': None})
+    for x in values:
+        send[x]=rospy.Publisher("pymlab/"+str(x), Float32)
+    print "send >>>", send
+    rospy.Subscriber("pymlab_data", SensorValues, Data, callback_args={'values': values, 'send': send})
     rospy.spin()
 
 if __name__ == "__main__":

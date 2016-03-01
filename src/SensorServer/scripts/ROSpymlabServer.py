@@ -63,27 +63,31 @@ class pymlab_server():
         if 'rate' in ecfg:
             self.rate = ecfg['rate']
             rospy.set_param("rate", float(self.rate))
-            print "rate", self.rate
         if 'methods' in ecfg:
             self.methods = ecfg['methods']
             rospy.set_param("methods", str(self.methods))
-            print "methods", self.methods
         if "start" in ecfg:
             self.status = True
             rate = rospy.Rate(self.rate)
             methods = self.methods
             devices = self.devices
-            #senderTest = rospy.Publisher('pymlab', Float32)
             sender = rospy.Publisher('pymlab_data', SensorValues, queue_size=20)
+            values = {}
+            for x in methods:
+                for y in methods[x]:
+                    print "methods >>", x, y
+                    values[str(x)+"/"+str(y)] = str(x)+"/"+str(y)
+            rospy.set_param("values", values)
             print sender
+            print "\n run \n\n"
             while not rospy.is_shutdown():
                 for x in methods:
-                    print "---", x
                     for y in methods[x]:
                         data = getattr(self.devices[devices[x].name], y)()
-                        print "dantaout>>", data
+                        print x, y, "%.4f"%data, "||",
                         sender.publish(name=str(devices[x].name)+"/"+str(y), value=data)
                         #senderTest.publish(data)
+                print "\r",
                 rate.sleep()
 
 
