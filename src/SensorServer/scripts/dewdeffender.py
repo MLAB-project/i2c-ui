@@ -51,36 +51,17 @@ if __name__ == "__main__":
                                         "get_temp"
                 }
         },
-        "Inputs":{
-                "Meteostanice":{
-                                        "get_temp",
-                                        "get_hum"
-                },
-                "TeplomerZarovka":{
-                                        "get_temp"
-                }
-        },
-        "Outputs": {
-                "Topeni":{
-                                        "set_ls0",
-                                        "set_ls1",
-                                        "set_pwm0",
-                                        "set_pwm1",
-                }
-        }
     }''')
 
-    #srv_PymlabSetValue = rospy.ServiceProxy('pymlab_drive/set', PymlabSetValue)
-    #srv_PymlabGetValue = rospy.ServiceProxy('pymlab_drive/get', PymlabGetValue)
-    srv_PymlabValue = rospy.ServiceProxy('pymlab_drive', PymlabSetValue)
-    print srv_PymlabValue(device="Topeni", method="set_ls0", parameters=str([0b11111111]))
-    print srv_PymlabValue(device="Topeni", method="set_ls1", parameters=str([0b11111111]))
+    srv_PymlabDrive = rospy.ServiceProxy('pymlab_drive', PymlabDrive)
+    print srv_PymlabDrive(device="Topeni", method="set_ls0", parameters=str([0b11111111]))
+    print srv_PymlabDrive(device="Topeni", method="set_ls1", parameters=str([0b11111111]))
 
     while not rospy.is_shutdown():
         print "----"
         for x in xrange(1,99,2):
-            print srv_PymlabValue(device="Topeni", method="set_pwm0", parameters="[100,%s]" %(str(x))), " - ",
-            print srv_PymlabValue(device="Topeni", method="set_pwm1", parameters="[100,%s]" %(str(100-x)))
+            print srv_PymlabDrive(device="Topeni", method="set_pwm0", parameters="[100,%s]" %(str(x))), " - ",
+            print srv_PymlabDrive(device="Topeni", method="set_pwm1", parameters="[100,%s]" %(str(100-x)))
             time.sleep(0.1)
 
         time.sleep(0.5)

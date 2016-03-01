@@ -28,7 +28,7 @@ class pymlab_server():
         self.cfg_bus = eval(cfg.bus)
         self.devices = {}
         Local_devices = {}
-        print cfg
+        rospy.loginfo("configuracni soubor: %s" %str(cfg))
         i2c = {
                 "port": 1,
             }
@@ -40,25 +40,26 @@ class pymlab_server():
                 ]
         self.pymlab_config = config.Config(i2c = self.cfg_i2c, bus = self.cfg_bus)
         self.pymlab_config.initialize()
-        print self.cfg_bus
+        #print self.cfg_bus
         for x in self.cfg_bus:
-            print "init >> ", x, x['name'], x['type']
+            #print "init >> ", x, x['name'], x['type']
             self.devices[x['name']] = self.pymlab_config.get_device(x['name'])
         rospy.set_param("devices", str(self.devices))
-        print "self.devices>>", self.devices
+        #print "self.devices>>", self.devices
+        rospy.loginfo("self.device: %s" %str(self.devices))
 
         return True
 
     def getvalue(self, cfg=None):
-        print "getval>>"
-        print cfg
+        #print "getval>>"
+        #print cfg
         val = int(float(self.lts_sen.get_temp()))
-        print "value je tohle:", val
+        #print "value je tohle:", val
         return GetSensValResponse(val)
 
     def status(self, cfg=None):
-        print "status>>", 
-        print cfg
+        #print "status>>", 
+        #print cfg
         self.rate = 1
         try:                            # pokud je servis s GetSensVal, tak se pouzije toto, 
             ecfg = eval(cfg.data)
@@ -67,7 +68,7 @@ class pymlab_server():
         print ecfg
         if 'rate' in ecfg:
             self.rate = ecfg['rate']
-            print "Vlastni frekvence", self.rate
+            #print "Vlastni frekvence", self.rate
         rospy.set_param("rate", float(self.rate))
         if 'AutoInputs' in ecfg:
             self.AutoInputs = ecfg['AutoInputs']
@@ -81,11 +82,11 @@ class pymlab_server():
             values = {}
             for x in AutoInputs:
                 for y in AutoInputs[x]:
-                    print "AutoInputs >>", x, y, 
-                    print str(x)+"/"+str(y), str(x)+"/"+str(y)
+                    #print "AutoInputs >>", x, y, 
+                    #print str(x)+"/"+str(y), str(x)+"/"+str(y)
                     values[str(x)+"/"+str(y)] = str(x)+"/"+str(y)
             rospy.set_param("values", values)
-            print "\n run \n\n"
+           # print "\n run \n\n"
             while True:
                 print "\r",
                 for x in AutoInputs:
@@ -115,9 +116,9 @@ def main():
     rospy.Subscriber("pymlab_server", PymlabServerStatusM, ps.status)
     s1 = rospy.Service('pymlab_init', PymlabInit, ps.init)
     s2 = rospy.Service('pymlab_server', PymlabServerStatus, ps.status)
-    s3 = rospy.Service('pymlab_drive', PymlabSetValue, ps.drive)
+    s3 = rospy.Service('pymlab_drive', PymlabDrive, ps.drive)
 
-    print "Ready to get work."
+    rospy.loginfo("Ready to get work.")
     rospy.spin()
 
 if __name__ == "__main__":

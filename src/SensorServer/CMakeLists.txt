@@ -58,8 +58,7 @@ find_package(catkin REQUIRED COMPONENTS
    #GetSensVal.srv
    PymlabServerStatus.srv
    PymlabInit.srv
-   PymlabSetValue.srv
-   PymlabGetValue.srv
+   PymlabDrive.srv
  )
 
 ## Generate actions in the 'action' folder
