@@ -47,6 +47,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    SensorValues.msg
+   PymlabServerStatusM.msg
 #   Message1.msg
 #   Message2.msg
  )
@@ -54,8 +55,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
-   GetSensVal.srv
+   #GetSensVal.srv
+   PymlabServerStatus.srv
    PymlabInit.srv
+   PymlabSetValue.srv
+   PymlabGetValue.srv
  )
 
 ## Generate actions in the 'action' folder
