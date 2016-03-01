@@ -1,0 +1,202 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            background-color: #DEFCD7;
+            margin: 0px;
+        }
+        #MenuA{
+            position: absolute;
+            background-color: red;
+            height: 100%;
+            min-width: 200px;
+            width: 10%;
+            top: 0px;
+            left: -200px;
+            z-index: 10;
+        }
+
+        #MenuB{
+            position: absolute;
+            background-color: blue;
+            height: 100%;
+            min-width: 200px;
+            width: 10%;
+            top: 0px;
+            left: -200px;
+        }
+        #W_collumn{
+            background-color: purple;
+            width: 40px;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            padding: 0px;
+            float: left;
+        } 
+        #W_collumn ul{
+            list-style-type: none;
+            background-color: green;
+            padding: 0px;
+            margin: 0px;
+        }
+        #W_collumn li{
+            margin: 2px;
+            height: 35px;
+            width: 35px;
+        }
+        #W_data{
+            background-color: #pink;
+            height: 100%;
+            width: auto;
+            margin: 0px;
+            padding: 0px;
+
+        }
+        #graf{
+            position: absolute;
+            min-width: 85%;
+            width: 95%;
+            height: 100%;
+            margin: 0px 0px 0px 40px
+        }
+    </style>
+
+    <script type="text/javascript">
+        function AfterLoad() {
+            document.getElementById("MenuA").style.left = "-200px";
+            document.getElementById("graf").style.top = "-100%";
+        }
+
+        function ShowGraf(name) {
+            document.getElementById("MenuA").style.left = "-200px";
+            document.getElementById("graf").style.top = "-100%";
+        }
+
+        function mainDiv(type, id) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    document.getElementById("W_data").innerHTML = xhttp.responseText;
+                }
+            }
+            xhttp.open("GET", "ver/"+type, true);
+            xhttp.send();
+            //document.getElementById("W_data").innerHTML='<object data="ver/'+type+'" ></object>';
+        }
+
+        function mainDivSens(type, id) {
+            document.getElementById("graf").style.top = "0px";
+            $('#container').highcharts('StockChart', {
+                chart : {
+                    events : {
+                        load : function () {
+                            var series = this.series[0];
+                            var x = (new Date()).getTime(), y = Math.round(Math.random() * 500);
+                            series.addPoint([x, y], true, true);
+                        }
+                    }
+                }
+            })
+        }
+
+    </script>
+    <script src="javascript/jquery-1.11.3.min.js"></script>
+    <script src="javascript/highstock.js"></script>
+    <script src="javascript/modules/exporting.js"></script>
+    <script src="javascript/highcharts.js"></script>
+    <script src="javascript/websocket_handle.js"></script>
+    <script type="text/javascript">
+    $(function () {
+
+        Highcharts.setOptions({
+            global : {
+                useUTC : false
+            }
+        });
+
+        // Create the chart
+        $('#container').highcharts('StockChart', {
+            chart : {
+                events : {
+                    load : function () {
+                    }
+                }
+            },
+            
+            rangeSelector : {
+                    selected : 2
+            },
+
+            title: {
+                text : 'I2C user interface {{ data[0] }}'
+            },
+
+            exporting: {
+                enabled: true
+            }
+        });
+
+    });
+
+    function addd() {
+        var chart = $('#container').highcharts();
+        var x = (new Date()).getTime(), y = Math.round(Math.random() * 500);
+        chart.series[0].addPoint([x, y], true, false);
+        console.log("Preg");
+        $.getJSON('var/json?sens=Teplota01', function(data) {
+        //$.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=large-dataset.json&callback=?', function(data) {
+            console.log("getJSON");
+            alert("data"); //uncomment this for debug
+            console.log(data);
+            console.log(data.Teplota01);
+            //alert(data.data+" "+data.Teplota01.data+" "+data.item3); //further debug
+            $('#MenuA').html("item1="+data.Teplota01+" item2="+data.item2+" item3="+data.item3+"");
+        });
+    };
+
+    </script>
+</head>
+<body>
+
+<div id = "MenuA" >
+<div><img src="images/icons/back_w_material.png" onclick="document.getElementById('MenuA').style.left = '-200px';"> MLAB Visualiser <br> project: <br>
+<a href="javascript:WebSocketTest()">Run WebSocket</a>
+</div>
+Ahoj 
+
+</div>
+<div id="graf">
+<div id="container" style="min-width: 310px; min-height: 400px; height: 100%;  margin: 0 auto"></div>
+</div>
+<div id = "Workspace" >
+    <div id = "W_collumn">
+        <ul>
+            <li><img src="images/icons/menu_w_material.png" onclick="document.getElementById('MenuA').style.left = '0px';"></li>
+            <li><a href="javascript:WebSocketTest()"><img src="images/icons/play_w_material.png"></li></a>
+                <li>IN</li>
+                {% for sens in data[0] %}
+                    <li><img src="images/icons/sensor_w_material.png" alt="{{ sens }}"></li>
+                {% end %}
+                <li>OUT</li>
+                {% for sens in data[1] %}
+                    <li><img src="images/icons/output_w_material.png" alt="{{ sens }}"></li>
+                {% end %}
+
+        </ul>
+    </div>
+    <div id="W_data">
+    </div>
+</div>
+<div id = "MenuB" >
+    
+
+</div>
+
+
+
+</body>
+</html>

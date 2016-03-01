@@ -1,0 +1,138 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ROS_js_plot</title>
+    <style>
+        body {
+            background-color: #DEFCD7;
+            margin: 0px;
+        }
+        #graf{
+            position: absolute;
+            min-width: 85%;
+            width: 100%;
+            height: 100%;
+            margin: 0px 0px 0px 0px;
+            padding: 0px;
+        }
+    </style>
+
+    <script type="application/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script type="text/javascript" src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
+
+    <script type="text/javascript">
+    
+    $(function () {
+
+        Highcharts.setOptions({
+            global : {
+                useUTC : true
+            }
+        });
+
+        // Create the chart
+        $('#container').highcharts('StockChart', {
+            chart : {
+                events : {
+                    load : function () {
+                    }
+                }
+            },
+            
+            rangeSelector : {
+                    selected : 3
+            },
+
+            title: {
+                text : 'I2C user interface'
+            },
+
+            exporting: {
+                enabled: true
+            }
+        });
+
+    });
+    </script>
+
+<script>
+// Komunikace s ROSem
+
+
+// pripojeni a chybove hlasky
+  var ros = new ROSLIB.Ros();
+  ros.on('error', function(error) {
+    console.log(error);
+  });
+  ros.on('connection', function() {
+    console.log('Pripojeno');
+  });
+  ros.on('close', function() {
+    console.log('Odpojeno :/');
+  });
+  ros.connect('ws://telescopeC.local:9090');
+
+  var rosdevices = new ROSLIB.Param({
+    ros : ros,
+    name : 'values'
+  });
+
+
+// funkce obstaravajici cteni z tématu
+  rosdevices.get(function(value) {
+    console.log( value);
+    devices = eval(value);
+    console.log(devices);
+    var devicesName = Object.keys(devices);
+    console.log(devicesName);
+    var listeners = [];
+    console.log(listeners);
+    var chart = $('#container').highcharts();
+    for (i = 0, len = devicesName.length; i < len; i++) {
+        console.log(devicesName[i].replace(/\\/g,''));
+        chart.addSeries({
+            id:   'pymlab/'+devicesName[i].replace(/\\/g,''),
+            name: devicesName[i],
+            data: [0, 10, 5]
+        });
+        console.log( devicesName[i] + i);
+            listeners[i] = new ROSLIB.Topic({
+                ros : ros,
+                name : 'pymlab/'+devicesName[i],
+                messageType : 'std_msgs/Float32'
+              });
+            listeners[i].subscribe(function(message) {
+                var chart = $('#container').highcharts();
+                var series = chart.get(this.name.replace(/\\/g,''));
+                //console.log(this.name, message.data, series);
+                series.addPoint(message.data);
+            });
+    //console.log(listeners)
+    }
+  });
+
+
+</script>
+
+
+
+
+
+
+
+
+ 
+</head>
+<body onload="">
+
+<div id="graf">
+    <div id="container" style="min-width: 310px; min-height: 400px; height: 100%;  margin: 0 auto">
+    </div>
+</div>
+
+
+</body>
+</html>

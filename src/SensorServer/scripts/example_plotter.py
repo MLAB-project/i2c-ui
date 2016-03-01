@@ -19,11 +19,6 @@ def main():
     rospy.init_node('pymlab_plotter_connector')
     values = rospy.get_param("values")
     send = {}
-    #print "methods >>>",rospy.get_param("methods")
-    #print "devices >>>",rospy.get_param("devices")
-    #devices = eval(rospy.get_param("devices"))
-    #print devices
-    #se=rospy.Publisher('pymlab/data/', Float32)
     for x in values:
         send[x]=rospy.Publisher("pymlab/"+str(x), Float32)
     print "send >>>", send
